@@ -1,0 +1,11 @@
+{
+  "pycam/Test/test_cxf_fonts.py": true, 
+  "pycam/Test/test_dxf_importer.py": true, 
+  "pycam/Test/test_intersection.py": true, 
+  "pycam/Test/test_motion_grid.py": true, 
+  "pycam/Test/test_pointutils.py": true, 
+  "pycam/Test/test_polygon.py": true, 
+  "pycam/Test/test_stl_loader.py": true, 
+  "pycam/Test/test_svg_loader.py": true, 
+  "pycam/Test/test_tools.py": true
+}

@@ -27,6 +27,7 @@ import time
 import uuid
 
 from pycam.Cutters.CylindricalCutter import CylindricalCutter
+from pycam.Cutters.CircleCutter import CircleCutter
 from pycam.Cutters.SphericalCutter import SphericalCutter
 from pycam.Cutters.ToroidalCutter import ToroidalCutter
 from pycam.Geometry import Box3D, Point3D
@@ -1060,6 +1061,8 @@ class Tool(BaseCollectionItemDataContainer):
         elif shape == ToolShape.TORUS:
             toroid_radius = self.get_value("toroid_radius")
             return ToroidalCutter(self.radius, toroid_radius, height=height)
+        elif shape == ToolShape.CIRCLE:
+            return CircleCutter(self.radius, height=height)
         else:
             raise InvalidKeyError(shape, ToolShape)
 

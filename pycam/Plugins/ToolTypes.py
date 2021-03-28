@@ -22,6 +22,7 @@ import pycam.Plugins
 import pycam.Cutters.SphericalCutter
 import pycam.Cutters.ToroidalCutter
 import pycam.Cutters.CylindricalCutter
+import pycam.Cutters.CircleCutter
 
 
 def tool_params_and_filters(*param_names):
@@ -106,3 +107,25 @@ class ToolTypeFlat(pycam.Plugins.PluginBase):
     @tool_params_and_filters("radius")
     def get_tool(self, radius):
         return pycam.Cutters.CylindricalCutter.CylindricalCutter(radius)
+
+class ToolTypeVerticleCircle(pycam.Plugins.PluginBase):
+
+    DEPENDS = ["Tools", "ToolParamRadius", "ToolParamFeedrate"]
+    CATEGORIES = ["Tool", "Parameter"]
+
+    def setup(self):
+        parameters = {"radius": 1.0,
+                      "feed": 300,
+                      ("spindle", "speed"): 1000,
+                      ("spindle", "spin_up_enabled"): True,
+                      ("spindle", "spin_up_delay"): 3}
+        self.core.get("register_parameter_set")("tool", "vertical_circle", "Vertical Circle",
+                                                self.get_tool, parameters=parameters, weight=10)
+        return True
+
+    def teardown(self):
+        self.core.get("unregister_parameter_set")("tool", "vertical_circle")
+
+    @tool_params_and_filters("radius")
+    def get_tool(self, radius):
+        return pycam.Cutters.CircleCutter.CircleCutter(radius)

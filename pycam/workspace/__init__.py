@@ -16,6 +16,7 @@ class ToolShape(Enum):
     FLAT_BOTTOM = "flat_bottom"
     BALL_NOSE = "ball_nose"
     TORUS = "torus"
+    CIRCLE = "vertical_circle"
 
 
 class ProcessStrategy(Enum):

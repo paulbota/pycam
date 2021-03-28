@@ -24,7 +24,7 @@ from pycam.Geometry.Line import Line
 from pycam.Geometry.PointUtils import padd, pcross, pdiv, pdot, pmul, pnorm, pnormalized, \
         pnormsq, psub
 from pycam.Utils.polynomials import poly4_roots
-
+from math import copysign
 
 def intersect_cylinder_point(center, axis, radius, radiussq, direction, point):
     # take a plane along direction and axis
@@ -95,6 +95,25 @@ def intersect_circle_plane(center, radius, direction, triangle):
     n2 = pnormalized(n2)
     # the cutter contact point is on the circle, where the surface normal is n
     ccp = padd(center, pmul(n2, -radius))
+    # intersect the plane with a line through the contact point
+    (cp, d) = triangle.plane.intersect_point(direction, ccp)
+    return (ccp, cp, d)
+
+def intersect_x_circle_plane(center, radius, direction, triangle):
+    # let n be the normal to the plane
+    n = triangle.normal
+    if pdot(n, direction) == 0:
+        return (None, None, INFINITE)
+    # project onto x=0
+    n2 = (0, n[1], n[2])
+    if pnorm(n2) == 0: # vector euclidian norm or length
+        (cp, d) = triangle.plane.intersect_point(direction, center)
+        ccp = psub(cp, pmul(direction, d))
+        return (ccp, cp, d)
+    n2 = pnormalized(n2)
+    # the cutter contact point is on the circle, where the surface normal is n
+    dir_sign = copysign(1, direction[0] + direction[1] + direction[2])
+    ccp = padd(center, pmul(n2, -radius * dir_sign))
     # intersect the plane with a line through the contact point
     (cp, d) = triangle.plane.intersect_point(direction, ccp)
     return (ccp, cp, d)
