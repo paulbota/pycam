@@ -21,7 +21,7 @@ along with PyCAM.  If not, see <http://www.gnu.org/licenses/>.
 from pycam.Geometry import INFINITE
 from pycam.Cutters.BaseCutter import BaseCutter
 from pycam.Geometry.intersection import intersect_circle_plane, intersect_circle_point, \
-        intersect_circle_line, intersect_x_circle_plane
+        intersect_circle_line, intersect_x_circle_plane, intersect_torus_plane
 from pycam.Geometry.PointUtils import padd, psub
 from pycam.Geometry.Triangle import Triangle
 
@@ -49,7 +49,7 @@ class CircleCutter(BaseCutter):
             return
         GL.glPushMatrix()
         GL.glTranslate(self.center[0], self.center[1], self.center[2])
-        GL.glRotatef(90, 1,0,0)
+        GL.glRotatef(90, 0,1,0)
         if not hasattr(self, "_cylinder"):
             self._cylinder = GLU.gluNewQuadric()
         GLU.gluCylinder(self._cylinder, self.radius, self.radius, 0.1, 10, 10)
@@ -103,10 +103,10 @@ class CircleCutter(BaseCutter):
         return (None, None, None, INFINITE)
 
     def intersect(self, direction, triangle, start=None):     
-        (cl_t, d_t, cp_t) = self.intersect_circle_triangle(direction, triangle, start=start)
         d = INFINITE
         cl = None
         cp = None
+        (cl_t, d_t, cp_t) = self.intersect_circle_triangle(direction, triangle, start=start)
         if d_t < d:
             d = d_t
             cl = cl_t
@@ -140,5 +140,5 @@ class CircleCutter(BaseCutter):
         if d_p3 < d:
             d = d_p3
             cl = cl_p3
-            cp = cp_p3   
+            cp = cp_p3     
         return (cl, d, cp)

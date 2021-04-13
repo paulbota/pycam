@@ -110,9 +110,9 @@ def intersect_x_circle_plane(center, radius, direction, triangle):
         (cp, d) = triangle.plane.intersect_point(direction, center)
         ccp = psub(cp, pmul(direction, d))
         return (ccp, cp, d)
-    n2 = pnormalized(n2)
+    n2 = pnormalized(n)
     # the cutter contact point is on the circle, where the surface normal is n
-    dir_sign = copysign(1, direction[0] + direction[1] + direction[2])
+    dir_sign = copysign(1, direction[0] * direction[1] * (-direction[2]))
     ccp = padd(center, pmul(n2, -radius * dir_sign))
     # intersect the plane with a line through the contact point
     (cp, d) = triangle.plane.intersect_point(direction, ccp)

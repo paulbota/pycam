@@ -141,6 +141,7 @@ class OpenGLViewModelTriangle(pycam.Plugins.PluginBase):
         if not models:
             return
         GL = self._GL
+        GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE)
         removal_list = []
         for index, model in enumerate(models):
             if not hasattr(model, "triangles"):

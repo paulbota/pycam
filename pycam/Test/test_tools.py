@@ -121,17 +121,28 @@ class CircleCutterCollisions(pycam.Test.PycamTestCase):
         # self.assert_vector_equal(self._drop(3, skewed_triangle), (0, 0, 5))
 
     def test_intersect(self):
+        A=(-4.961088,-4.82449,4.188777)
+        B=(-4.961088,-0.635713,4.188777)
+        C=(-0.772311,-0.635713,4.188777)
+        D=(-0.772311,-4.82449,4.188777)
+        F=(-0.772311,-0.635713,0)
+        H=(-4.961088,-4.82449,0)
         # flat triangle
         flat_triangle = Triangle((0, 2, 1), (0, 0, 3), (0, -2, 1))
         # self.assert_vector_equal(self._intersect(0.5, (-1, 0, 0), flat_triangle, (3,0,2)), ((0,0,2), 3, (0,0,2)))
         # self.assert_vector_equal(self._intersect(0.5, (1, 0, 0), flat_triangle, (-2,0,2)), ((0,0,2), 3, (0,0,2)))
         # skewed triangle
         skewed_triangle = Triangle((-2, 2, 1), (2, 0, 3), (-2, -2, 1))
-        self.assert_vector_equal(self._intersect(0.5, (-1, 0, 0), skewed_triangle, (3,0,2)), ((0,0,2), 3, (0,0,2)))
+        # self.assert_vector_equal(self._intersect(0.5, (-1, 0, 0), skewed_triangle, (3,0,2)), ((0,0,2), 3, (0,0,2)))
         # self.assert_vector_equal(self._intersect(0.5, (1, 0, 0), skewed_triangle, (-3,0,2)), ((0,0,2), 3, (0,0,2)))
         flat_z_triangle = Triangle((-2, 2, 2), (2, 0, 2), (-2, -2, 2))
-        # self.assert_vector_equal(self._intersect(0.5, (-1, 0, 0), flat_z_triangle, (3,0,2)), ((2,0,2), 3, (2,0,2)))
+        # self.assert_vector_equal(self._intersect(0.5, (0, 0, -1), flat_z_triangle, (0,0,5)), ((2,0,2), 3, (2,0,2)))
         
+        ADH = Triangle(A, D, H)
+        ABH = Triangle(A, B, H)
+        CDF = Triangle(C, D, F)
+        self.assert_vector_equal(self._intersect(0.5, (1, 0, 0), CDF, (-6,-2,3)), ((2,0,2), 3, (2,0,2)))
+
         # self.assert_vector_equal(self._drop(0.5, skewed_triangle), (0, 0, 2.5))
         # self.assert_vector_equal(self._drop(1.5, skewed_triangle), (0, 0, 3.5))
         # self.assert_vector_equal(self._drop(1.9, skewed_triangle), (0, 0, 3.9))

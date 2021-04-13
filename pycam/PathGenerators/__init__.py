@@ -73,7 +73,7 @@ def get_free_paths_triangles(models, cutter, p1, p2, return_triangles=False):
     # find all hits along scan line
     hits = []
 
-    triangles = model.triangles(minx - cutter.distance_radius, miny - cutter.distance_radius, minz,
+    triangles = model.triangles(minx - cutter.distance_radius, miny - cutter.distance_radius, minz - cutter.distance_radius,
                                 maxx + cutter.distance_radius, maxy + cutter.distance_radius,
                                 INFINITE)
 
