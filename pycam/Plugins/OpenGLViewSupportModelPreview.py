@@ -55,7 +55,7 @@ class OpenGLViewSupportModelPreview(pycam.Plugins.PluginBase):
         if self.core.get("view_light"):
             GL.glDisable(GL.GL_LIGHTING)
         # show a wireframe
-        if self.core.get("view_polygon"):
+        if True or self.core.get("view_polygon"):
             GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE)
         # change the color
         col = self.core.get("color_support_preview")

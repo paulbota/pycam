@@ -127,3 +127,10 @@ def points_in_line(a, b, c):
     return ((v1[1] * v2[2] == v1[2] * v2[1])
             and (v1[0] * v2[2] == v1[2] * v2[0])
             and (v1[0] * v2[1] == v1[1] * v2[0]))
+
+def are_vectors_parallel(v1, v2):
+    r0 = v1[0] / v2[0] if v2[0] else 0
+    r1 = v1[1] / v2[1] if v2[1] else 0
+    r2 = v1[2] / v2[2] if v2[2] else 0
+
+    return (r0 <= r1 + epsilon and r0 >= r1 - epsilon) and (r2 <= r1 + epsilon and r2 >= r1 - epsilon)

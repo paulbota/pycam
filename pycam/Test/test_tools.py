@@ -32,6 +32,9 @@ class CylindricalCutterCollisions(pycam.Test.PycamTestCase):
     def _drop(self, radius, triangle):
         return CylindricalCutter(radius, location=(0, 0, 0)).drop(triangle)
 
+    def _intersect(self, radius, direction, triangle, start):
+        return CylindricalCutter(radius, location=(0, 0, 0)).intersect(direction, triangle, start)
+
     def test_drop(self):
         "Drop"
         # flat triangle
@@ -45,6 +48,17 @@ class CylindricalCutterCollisions(pycam.Test.PycamTestCase):
 #       self.assert_vector_equal(self._drop(2.0, skewed_triangle), (0, 0, 3))
 #       self.assert_vector_equal(self._drop(2.1, skewed_triangle), (0, 0, 3))
 #       self.assert_vector_equal(self._drop(3, skewed_triangle), (0, 0, 3))
+
+    def test_intersect(self):
+        A=(-4.961088,-4.82449,4.188777)
+        B=(-4.961088,-0.635713,4.188777)
+        C=(-0.772311,-0.635713,4.188777)
+        D=(-0.772311,-4.82449,4.188777)
+        F=(-0.772311,-0.635713,0)
+        H=(-4.961088,-4.82449,0)
+
+        CDF = Triangle(C, D, F)
+        self.assert_vector_equal(self._intersect(0.5, (1, 0, 0), CDF, (-6,-2,3)), ((2,0,2), 3, (2,0,2)))
 
 
 class SphericalCutterCollisions(pycam.Test.PycamTestCase):
@@ -139,9 +153,12 @@ class CircleCutterCollisions(pycam.Test.PycamTestCase):
         # self.assert_vector_equal(self._intersect(0.5, (0, 0, -1), flat_z_triangle, (0,0,5)), ((2,0,2), 3, (2,0,2)))
         
         ADH = Triangle(A, D, H)
+        ACD = Triangle(A, C, D)
         ABH = Triangle(A, B, H)
         CDF = Triangle(C, D, F)
-        self.assert_vector_equal(self._intersect(0.5, (1, 0, 0), CDF, (-6,-2,3)), ((2,0,2), 3, (2,0,2)))
+
+        result = self._intersect(0.5, (0, 0, -1), ACD, (-3,-2.6,6))
+        self.assert_vector_equal(result, ())
 
         # self.assert_vector_equal(self._drop(0.5, skewed_triangle), (0, 0, 2.5))
         # self.assert_vector_equal(self._drop(1.5, skewed_triangle), (0, 0, 3.5))
@@ -150,6 +167,48 @@ class CircleCutterCollisions(pycam.Test.PycamTestCase):
 #       self.assert_vector_equal(self._drop(2.1, skewed_triangle), (0, 0, 3))
         # self.assert_vector_equal(self._drop(3, skewed_triangle), (0, 0, 5))
 
+    def test_intersect_edge_z_axis(self):
+        A=(-4.961088,-4.82449,4.188777)
+        B=(-4.961088,-0.635713,4.188777)
+        C=(-0.772311,-0.635713,4.188777)
+        D=(-0.772311,-4.82449,4.188777)
+        F=(-0.772311,-0.635713,0)
+        H=(-4.961088,-4.82449,0)
+
+        ACD = Triangle(A, C, D)
+
+        (cl, d, cp) = self._intersect(0.5, (0, 0, -1), ACD, (-3,-2.6,6))
+        self.assert_vector_aprox_equal(cl, (-3, -2.6, 4.113), 0.01)
+        self.assert_vector_aprox_equal(cp, (-3, -2.86, 4.188), 0.01)
+    
+    def test_intersect_lateral_edge_z_axis(self):
+        A=(-4.961088,-4.82449,4.188777)       
+        C=(-0.772311,-0.635713,4.188777)
+        D=(-0.772311,-4.82449,4.188777)        
+
+        ACD = Triangle(A, C, D)
+        radius = 0.5
+        direction = (0,0,-1)
+
+        #perpendicular
+        start = (-3, -4.82, 6)
+        (cl, d, cp) = self._intersect(radius, direction, ACD, start)
+        self.assert_vector_aprox_equal(cl, (-3, -4.82, 4.188), 0.01)
+        self.assert_vector_aprox_equal(cp, (-3, -4.82, 4.188), 0.01)
+
+        #slighly after
+        start = (-3, -5, 6)
+        (cl, d, cp) = self._intersect(radius, direction, ACD, start)
+        self.assert_vector_aprox_equal(cl, (-3.0, -5.0, 4.156), 0.01)
+        self.assert_vector_aprox_equal(cp, (-3.0, -4.82449, 4.188777), 0.01)
+
+        #slighly before
+        start = (-3, -4.6, 6)
+        (cl, d, cp) = self._intersect(radius, direction, ACD, start)
+        self.assert_vector_aprox_equal(cl, (-3.0, -4.6, 4.188777), 0.01)
+        self.assert_vector_aprox_equal(cp, (-3.0, -4.6, 4.188777), 0.01)
+
+    # test lateral edge hit with rectangle
         
 
 if __name__ == "__main__":

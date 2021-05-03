@@ -53,5 +53,8 @@ class PycamTestCase(unittest.TestCase):
         self.assertAlmostEqual(d1, d2, msg=("Collisions differ ({} != {}) due to distance"
                                             .format(collision1, collision2)))
 
+    def assert_vector_aprox_equal(self, v1, v2, max_deviance):
+        self.assertIsNone(self._compare_vectors(v1, v2, max_deviance))
+
 
 main = unittest.main

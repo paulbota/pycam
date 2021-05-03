@@ -21,8 +21,9 @@ along with PyCAM.  If not, see <http://www.gnu.org/licenses/>.
 from pycam.Geometry import INFINITE, sqrt, epsilon
 from pycam.Geometry.Plane import Plane
 from pycam.Geometry.Line import Line
+from pycam.Geometry.Triangle import Triangle
 from pycam.Geometry.PointUtils import padd, pcross, pdiv, pdot, pmul, pnorm, pnormalized, \
-        pnormsq, psub
+        pnormsq, psub, are_vectors_parallel
 from pycam.Utils.polynomials import poly4_roots
 from math import copysign
 
@@ -118,6 +119,67 @@ def intersect_x_circle_plane(center, radius, direction, triangle):
     (cp, d) = triangle.plane.intersect_point(direction, ccp)
     return (ccp, cp, d)
 
+def intersect_rectangle_line(center, rectagle_radius, axis, direction, edge):
+    d = edge.dir
+    # take a plane through the line and along the cylinder axis (1)
+    n = pcross(d, axis)
+    if pnorm(n) == 0:
+        # no contact point, but should check here if cylinder *always*
+        # intersects line...
+        return (None, None, INFINITE)
+    n = pnormalized(n)
+    # the contact line between the cylinder and this plane (1)
+    # is where the surface normal is perpendicular to the plane
+    # so line := ccl + \lambda * axis
+    
+    # TODO CHANGE to include the rectangle margins
+    ccl1 = padd(center, pmul(axis, rectagle_radius))
+    ccl2 = psub(center, pmul(axis, rectagle_radius))
+
+    d_ccl1 = edge.dist_to_point(ccl1)
+    d_ccl2 = edge.dist_to_point(ccl2)
+
+    if d_ccl1 < d_ccl2:
+        ccl = ccl1
+    elif d_ccl1 > d_ccl2:
+        ccl = ccl2
+    else:
+        ccl = center   
+
+    # now extrude the contact line along the direction, this is a plane (2)
+    n2 = pcross(direction, axis)
+    if pnorm(n2) == 0:
+        # no contact point, but should check here if cylinder *always*
+        # intersects line...
+        return (None, None, INFINITE)
+    n2 = pnormalized(n2)
+    plane1 = Plane(ccl, n2)
+    # intersect this plane with the line, this gives us the contact point
+    (cp, l) = plane1.intersect_point(d, edge.p1)
+    if not cp:
+        return (None, None, INFINITE)
+    # now take a plane through the contact line and perpendicular to the
+    # direction (3)
+    plane2 = Plane(ccl, direction)
+    # the intersection of this plane (3) with the line through the contact point
+    # gives us the cutter contact point
+    (ccp, l) = plane2.intersect_point(direction, cp)
+    cp = padd(ccp, pmul(direction, -l))
+    return (ccp, cp, -l)
+
+def intersect_rectangle_point(center, axis, radius, direction, point):
+    # take a plane along direction and axis
+    n = pnormalized(pcross(direction, axis))
+    # distance of the point to the center, on this plane
+    d = pdot(n, point) - pdot(n, center)
+    if abs(d) > radius - epsilon:
+        return (None, None, INFINITE)    
+    # take plane through ccl and axis
+    plane = Plane(center, direction)
+    # intersect point with plane
+    (ccp, l) = plane.intersect_point(direction, point)
+    return (ccp, point, -l)
+    
 
 def intersect_circle_point(center, axis, radius, radiussq, direction, point):
     # take a plane through the base
@@ -136,16 +198,18 @@ def intersect_circle_line(center, axis, radius, radiussq, direction, edge):
     if pdot(d, axis) == 0:
         if pdot(direction, axis) == 0:
             return (None, None, INFINITE)
+        # Tool plane
         plane = Plane(center, axis)
         (p1, l) = plane.intersect_point(direction, edge.p1)
         (p2, l) = plane.intersect_point(direction, edge.p2)
+        # Closest plane intersection point to the center
         pc = Line(p1, p2).closest_point(center)
         d_sq = pnormsq(psub(pc, center))
         if d_sq >= radiussq:
             return (None, None, INFINITE)
         a = sqrt(radiussq - d_sq)
-        d1 = pdot(psub(p1, pc), d)
-        d2 = pdot(psub(p2, pc), d)
+        d1 = pdot(psub(p1, pc), d) #Distance between the closest point on the line and p1
+        d2 = pdot(psub(p2, pc), d) #Distance between the closest point on the line and p2
         ccp = None
         cp = None
         if abs(d1) < a - epsilon:
@@ -188,7 +252,8 @@ def intersect_circle_line(center, axis, radius, radiussq, direction, edge):
         return (None, None, INFINITE)
     # must be on circle
     dist2 = sqrt(radiussq - distsq)
-    if pdot(d, axis) < 0:
+    # HACKYFIX
+    if pdot(v, (-1,-1,-1)) < 0:
         dist2 = -dist2
     ccp = psub(center, psub(pmul(n2, dist), pmul(v, dist2)))
     plane = Plane(edge.p1, pcross(pcross(d, direction), d))
