@@ -208,8 +208,26 @@ class CircleCutterCollisions(pycam.Test.PycamTestCase):
         self.assert_vector_aprox_equal(cl, (-3.0, -4.6, 4.188777), 0.01)
         self.assert_vector_aprox_equal(cp, (-3.0, -4.6, 4.188777), 0.01)
 
-    # test lateral edge hit with rectangle
-        
+    def test_intersect_lateral_edge_y_axis_rectangle(self):
+        A=(-4.961088,-4.82449,4.188777)
+        B=(-4.961088,-0.635713,4.188777)
+        C=(-0.772311,-0.635713,4.188777)
+
+        ABC = Triangle(A, B, C)        
+        radius = 0.5
+        direction = (0,-1, 0)
+
+        start = (-3.7534980625000003, -9.82449, 2.5943885)
+        (cl, d, cp) = self._intersect(radius, direction, ABC, start)
+        self.assert_vector_aprox_equal(cl, (-3.75, -0.13, 2.59), 0.01)
+        self.assert_vector_aprox_equal(cp, (-3.75, -0.63, 4.18), 0.01)
+
+        direction = (0,1, 0)
+
+        start = (-3.7534980625000003, -9.82449, 2.5943885)
+        (cl, d, cp) = self._intersect(radius, direction, ABC, start)
+        self.assert_vector_aprox_equal(cl, (-3.75, -4.11, 2.59), 0.01)
+        self.assert_vector_aprox_equal(cp, (-3.75, -3.61, 4.18), 0.01)
 
 if __name__ == "__main__":
     pycam.Test.main()

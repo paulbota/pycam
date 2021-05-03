@@ -133,18 +133,8 @@ def intersect_rectangle_line(center, rectagle_radius, axis, direction, edge):
     # so line := ccl + \lambda * axis
     
     # TODO CHANGE to include the rectangle margins
-    ccl1 = padd(center, pmul(axis, rectagle_radius))
-    ccl2 = psub(center, pmul(axis, rectagle_radius))
-
-    d_ccl1 = edge.dist_to_point(ccl1)
-    d_ccl2 = edge.dist_to_point(ccl2)
-
-    if d_ccl1 < d_ccl2:
-        ccl = ccl1
-    elif d_ccl1 > d_ccl2:
-        ccl = ccl2
-    else:
-        ccl = center   
+    ccl1 = padd(center, pmul((0, 1, 0), rectagle_radius))
+    ccl2 = psub(center, pmul((0, 1, 0), rectagle_radius))
 
     # now extrude the contact line along the direction, this is a plane (2)
     n2 = pcross(direction, axis)
@@ -153,19 +143,31 @@ def intersect_rectangle_line(center, rectagle_radius, axis, direction, edge):
         # intersects line...
         return (None, None, INFINITE)
     n2 = pnormalized(n2)
-    plane1 = Plane(ccl, n2)
-    # intersect this plane with the line, this gives us the contact point
-    (cp, l) = plane1.intersect_point(d, edge.p1)
-    if not cp:
-        return (None, None, INFINITE)
-    # now take a plane through the contact line and perpendicular to the
-    # direction (3)
-    plane2 = Plane(ccl, direction)
-    # the intersection of this plane (3) with the line through the contact point
-    # gives us the cutter contact point
-    (ccp, l) = plane2.intersect_point(direction, cp)
-    cp = padd(ccp, pmul(direction, -l))
-    return (ccp, cp, -l)
+
+    def get_intersection(ccl):
+        plane1 = Plane(ccl, n2)
+        # intersect this plane with the line, this gives us the contact point
+        (cp, l) = plane1.intersect_point(d, edge.p1)
+        if not cp:
+            return (None, None, INFINITE)
+        # now take a plane through the contact line and perpendicular to the
+        # direction (3)
+        plane2 = Plane(ccl, direction)
+        # the intersection of this plane (3) with the line through the contact point
+        # gives us the cutter contact point
+        (ccp, l) = plane2.intersect_point(direction, cp)
+        cp = padd(ccp, pmul(direction, -l))
+
+        return (ccp, cp, -l) 
+
+    (ccp_ccl1, cp_ccl1, l_ccl1) = get_intersection(ccl1)
+    (ccp_ccl2, cp_ccl2, l_ccl2) = get_intersection(ccl2)
+
+    if l_ccl1 < l_ccl2:
+        return (ccp_ccl1, cp_ccl1, l_ccl1)
+    if l_ccl2 < l_ccl1:
+        return (ccp_ccl2, cp_ccl2, l_ccl2)
+    return get_intersection(center)
 
 def intersect_rectangle_point(center, axis, radius, direction, point):
     # take a plane along direction and axis
